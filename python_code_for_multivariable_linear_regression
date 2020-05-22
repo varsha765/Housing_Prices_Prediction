@@ -1,0 +1,81 @@
+#predicting which city to expand to next using linear regression with one variable
+#step_1: plotting the data
+#import libraries
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+#loading_data
+df=pd.read_csv('ex1data2.txt', delimiter=',')
+
+#feature_normalization
+#for_size
+mean_size=df['size'].mean()
+df['size']=df['size']-mean_size
+std_size=df['size'].std()
+df['size']=df['size']/std_size
+s=np.array([df['size']])
+s=s.reshape(m)
+
+#for_bedrooms
+mean_room=df['bedrooms'].mean()
+df['bedrooms']=df['bedrooms']-mean_room
+std_room=df['bedrooms'].std()
+df['bedrooms']=df['bedrooms']/std_room
+r=np.array([df['bedrooms']])
+r=r.reshape(m)
+
+#price
+p=np.array(df['price'])
+p=p.reshape(m,1)
+theta=np.zeros((3,1))    # initializing parameters to 0
+alpha= 0.01        #picking a learning rate alpha
+iterations= 2000      #number of iterations
+X=np.zeros((m,3))
+X[:,0]=np.ones((m))
+X[:,1]=s
+X[:,2]=r
+
+
+#computing cost function
+def compute_cost(m,H,Y):
+    j=(0.5/m)*np.sum((H-Y)**2)
+    return j
+    
+def gradient_desc(theta, alpha, X,Y, iterations,k):
+    
+    for i in range(0,iterations):
+        H=np.dot(X,theta)
+        k.append(compute_cost(m,H,Y))
+        theta[0]=theta[0]-alpha*np.sum(H-Y)
+        theta[1 :]=theta[1 :]-alpha*(np.dot(X[:,1 :].T,H-Y))
+    return k
+
+
+k=[]
+gradient_desc(theta,alpha,X,p,iterations,k)
+
+x=np.linspace(1,iterations,iterations)
+
+plt.plot(x,k)
+plt.show()
+
+def prediction(a,theta):
+    
+    b=np.zeros((3,1))
+    b[0,0]=np.ones((1,1))
+    
+    b[1,0]=(a[0]-mean_size)/std_size
+    b[2,0]=(a[1]-mean_room)/std_room
+    
+    pred=np.dot(theta.T,b)
+    return pred
+
+
+#input values for predicting the price of a new house
+a=np.array([2104,3])
+price=prediction(a,theta)[0]
+print(theta)
+
+print(f'the price of this house is predicted to be {price} dollars')
